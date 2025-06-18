@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: webhook-redirect
+    runtime: python
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    env: python
