@@ -17,7 +17,7 @@ def webhook():
     data = request.json
     try:
         # Extract product ID
-        product_id = data.get("order", {}).get("line_items", [{}])[0].get("id")
+        product_id = data.get("order", {}).get("line_items", [{}])[0].get("meta", {}).get("product_id")
 
         # Map product ID to redirect URL
         redirect_url = redirect_map.get(product_id)
