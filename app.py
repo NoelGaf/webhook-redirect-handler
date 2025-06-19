@@ -41,54 +41,89 @@ email_timer_thread = None
 lock = threading.Lock()
 
 def get_or_create_order_id(email, phone):
-    key = f"{email.lower()}|{phone}"
-    if key not in customer_order_ids:
-        customer_order_ids[key] = str(uuid.uuid4())[:8].upper()
-    return customer_order_ids[key]
+    """
+    Consistently generate a pseudo-unique order ID per customer
+    by hashing email + phone.
+    """
+    key = f"{email.lower()}-{phone}"
+    return "INV-" + hashlib.md5(key.encode()).hexdigest()[:8].upper()
+
 
 def write_order_to_csv(data):
+    try:
+        order = data.get("order")
+        if not order:
+            print("[!] Error processing webhook: 'order' key missing")
+            return
 
-    customer = data.get("customer") or data["order"].get("customer")
-    line_items = data["order"]["line_items"]
+        # Fallback if customer block is missing from order
+        customer = order.get("customer") or {
+            "first_name": data.get("first_name", ""),
+            "last_name": data.get("last_name", ""),
+            "full_name": data.get("full_name", ""),
+            "email": data.get("email", ""),
+            "phone": data.get("phone", ""),
+            "full_address": data.get("full_address", ""),
+            "city": data.get("city", ""),
+            "state": data.get("state", ""),
+            "postal_code": data.get("postal_code", ""),
+            "country": data.get("country", "")
+        }
 
-    file_exists = os.path.isfile(CSV_FILE)
+        line_items = order.get("line_items", [])
+        if not line_items:
+            print("[!] No line items in order.")
+            return
 
-    with open(CSV_FILE, "a", newline='') as f:
-        writer = csv.writer(f)
+        order_id = get_or_create_order_id(customer["email"], customer["phone"])
+        delivery_date = datetime.utcnow().strftime("%d/%m/%Y")
+        company_name = (
+            customer.get("full_name") or
+            customer.get("name") or
+            f"{customer.get('first_name', '')} {customer.get('last_name', '')}".strip()
+        )
 
-        if not file_exists:
-            writer.writerow([
-                "Order ID", "Date", "Product Title", "Quantity", "Price",
-                "First Name", "Last Name", "Email", "Phone", "Address",
-                "City", "State", "Postal Code", "Country", "Product Code"
-            ])
+        # Ensure the file has headers if new
+        file_exists = os.path.exists(CSV_FILE)
+        with open(CSV_FILE, "a", newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow([
+                    "delivery_date", "customer_reference", "company_name",
+                    "street", "suburb", "postcode", "state",
+                    "value", "code", "description", "qty", "Instructions"
+                ])
 
-        for item in line_items:
-            product_id = item["meta"].get("product_id", "UNKNOWN")
-            product_code = product_code_map.get(product_id, "UNKNOWN")
+            for item in line_items:
+                meta = item.get("meta", {})
+                product_id = meta.get("product_id")
+                if not product_id:
+                    print("[!] Unknown product ID: None")
+                    continue
 
-            order_id = item["meta"].get("order_id") or get_or_create_order_id(
-                customer["email"], customer["phone"]
-            )
+                product_code = product_code_map.get(product_id, "UNKNOWN")
+                if product_code == "UNKNOWN":
+                    print(f"[!] Unknown product ID: {product_id}")
 
-            row = [
-                order_id,
-                datetime.utcnow().strftime("%Y-%m-%d"),
-                item["title"],
-                item["quantity"],
-                item["price"],
-                customer.get("first_name", ""),
-                customer.get("last_name", ""),
-                customer.get("email", ""),
-                customer.get("phone", ""),
-                customer.get("full_address", ""),
-                customer.get("city", ""),
-                customer.get("state", ""),
-                customer.get("postal_code", ""),
-                customer.get("country", ""),
-                product_code
-            ]
-            writer.writerow(row)
+                row = [
+                    delivery_date,                      # delivery_date
+                    order_id,                           # customer_reference
+                    company_name,                       # company_name
+                    customer.get("full_address", ""),   # street
+                    customer.get("city", ""),           # suburb
+                    customer.get("postal_code", ""),    # postcode
+                    customer.get("state", ""),          # state
+                    f'${item["line_price"]:.2f}',       # value
+                    product_code,                       # code
+                    item.get("title", ""),              # description
+                    item.get("quantity", 1),            # qty
+                    "Deliver ASAP"                      # Instructions
+                ]
+                writer.writerow(row)
+
+    except Exception as e:
+        print(f"[!] Exception while writing order to CSV: {e}")
+        print(f"[!] Payload: {json.dumps(data, indent=2)}")
 
 
 def email_csv_file():
