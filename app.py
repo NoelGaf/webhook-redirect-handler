@@ -103,7 +103,7 @@ def email_csv_file():
 def start_email_timer():
     global email_timer_thread
     def delayed_email():
-        time.sleep(1800)  # 30-minute delay
+        time.sleep(60)  # temporary 1-minute delay for testing - change afterwards
         with lock:
             email_csv_file()
     if email_timer_thread and email_timer_thread.is_alive():
