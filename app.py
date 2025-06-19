@@ -47,34 +47,49 @@ def get_or_create_order_id(email, phone):
     return customer_order_ids[key]
 
 def write_order_to_csv(data):
-    customer = data["customer"]
+
+    customer = data.get("customer") or data["order"].get("customer")
     line_items = data["order"]["line_items"]
 
-    order_id = get_or_create_order_id(customer["email"], customer["phone"])
+    file_exists = os.path.isfile(CSV_FILE)
 
     with open(CSV_FILE, "a", newline='') as f:
         writer = csv.writer(f)
+
+        if not file_exists:
+            writer.writerow([
+                "Order ID", "Date", "Product Title", "Quantity", "Price",
+                "First Name", "Last Name", "Email", "Phone", "Address",
+                "City", "State", "Postal Code", "Country", "Product Code"
+            ])
+
         for item in line_items:
-            product_id = item["meta"]["product_id"]
+            product_id = item["meta"].get("product_id", "UNKNOWN")
             product_code = product_code_map.get(product_id, "UNKNOWN")
+
+            order_id = item["meta"].get("order_id") or get_or_create_order_id(
+                customer["email"], customer["phone"]
+            )
+
             row = [
                 order_id,
                 datetime.utcnow().strftime("%Y-%m-%d"),
                 item["title"],
                 item["quantity"],
                 item["price"],
-                customer["first_name"],
-                customer["last_name"],
-                customer["email"],
-                customer["phone"],
-                customer["full_address"],
-                customer["city"],
-                customer["state"],
-                customer["postal_code"],
-                customer["country"],
+                customer.get("first_name", ""),
+                customer.get("last_name", ""),
+                customer.get("email", ""),
+                customer.get("phone", ""),
+                customer.get("full_address", ""),
+                customer.get("city", ""),
+                customer.get("state", ""),
+                customer.get("postal_code", ""),
+                customer.get("country", ""),
                 product_code
             ]
             writer.writerow(row)
+
 
 def email_csv_file():
     if not os.path.exists(CSV_FILE):
