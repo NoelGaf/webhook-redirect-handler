@@ -103,6 +103,9 @@ def write_order_to_csv(data):
                     print("[!] Unknown product ID: None")
                     continue
 
+                print("[DEBUG] product_code_map keys:", list(product_code_map.keys()))
+                print("[DEBUG] Looking up product_id:", product_id)
+
                 product_code = product_code_map.get(product_id, "UNKNOWN")
                 if product_code == "UNKNOWN":
                     print(f"[!] Unknown product ID: {product_id}")
