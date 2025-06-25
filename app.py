@@ -52,7 +52,7 @@ product_code_map = {
     "68541004449a2fa5a42b06ae": "CZY-7106-447",
     "6854112dbdcc26775483bd6b": "CZY-9847-447",
     "68541362bdcc26a5e383be10": "CZY-7703-447",
-    "68541490449a2f564f2b083e": "CZY-8023-447",
+    "68541490449a2f564f2b083e": "CZY-8023-447"
 }
 
 # Product ID → Quantity Multiplier
@@ -70,7 +70,7 @@ quantity_multiplier_map = {
     "68541004449a2fa5a42b06ae": 3,
     "6854112dbdcc26775483bd6b": 1,
     "68541362bdcc26a5e383be10": 2,
-    "68541490449a2f564f2b083e": 1,
+    "68541490449a2f564f2b083e": 1
     # Add more as needed
 }
 
