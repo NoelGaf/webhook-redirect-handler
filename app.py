@@ -158,7 +158,7 @@ def write_order_to_csv(data):
                     f'${item["line_price"]:.2f}',       # value
                     product_code,                       # code
                     item.get("title", ""),              # description
-                    item.get("quantity", 1) * quantity_multiplier_map.get(product_id, 1) # qty
+                    item.get("quantity", 1) * quantity_multiplier_map.get(product_id, 1), # qty
                     "Deliver ASAP"                      # Instructions
                 ]
                 writer.writerow(row)
