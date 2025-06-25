@@ -16,7 +16,13 @@ CORS(app)
 
 # ====== 🔁 Redirect Setup ======
 redirect_map = {
-    "68498909ec6af1a2cb6f4fc2": "https://bits4bucks.com/home-care"
+    "685aa39f0b7a70008d57becb": "https://bits4bucks.com/dryer-sheets",
+    "68540ce011cea80f6c114d17": "https://bits4bucks.com/care-bears-bag",
+    "685aa42aaae705008b92c6af": "https://bits4bucks.com/baby-cover",
+    "685aa474aae705f2a792c6fc": "https://bits4bucks.com/shower-caddy",
+    "685aa4ab661af0792e6dcb4c": "https://bits4bucks.com/zoom-ball",
+    "68541362bdcc26a5e383be10": "https://bits4bucks.com/nivea-orchid",
+    "68541004449a2fa5a42b06ae": "https://bits4bucks.com/deep-waver",
 }
 latest_redirect = {"url": None}
 
@@ -33,8 +39,39 @@ customer_order_ids = {}
 
 # Product ID → Fulfillment Code
 product_code_map = {
-    "68498909ec6af1a2cb6f4fc2": "CZY-2585-447",
-    "68514db465abfb3e79c59130": "CZY-5942-447"
+    "685aa39f0b7a70008d57becb": "CZY-2585-447",
+    "68514db465abfb3e79c59130": "CZY-5942-447",
+    "685aa42aaae705008b92c6af": "CZY-3502-447",
+    "6849870ffcd4bca78d49f61e": "CZY-5313-447",
+    "685aa474aae705f2a792c6fc": "CZY-5284-447",
+    "685407f2bdcc2683ad83b95c": "CZY-5988-447",
+    "685aa4ab661af0792e6dcb4c": "CZY-3254-447",
+    "68540b77449a2f5f252b0500": "CZY-3765-447",
+    "68540ce011cea80f6c114d17": "CZY-7214-447",
+    "68540dd9449a2f99ff2b05d2": "CZY-1380-447",
+    "68541004449a2fa5a42b06ae": "CZY-7106-447",
+    "6854112dbdcc26775483bd6b": "CZY-9847-447",
+    "68541362bdcc26a5e383be10": "CZY-7703-447",
+    "68541490449a2f564f2b083e": "CZY-8023-447",
+}
+
+# Product ID → Quantity Multiplier
+quantity_multiplier_map = {
+    "685aa39f0b7a70008d57becb": 2,  # Example: socks (bundle of 2 units per 1 ordered)
+    "68514db465abfb3e79c59130": 1,  # Normal item (send exactly what was ordered)
+    "685aa42aaae705008b92c6af": 2,
+    "6849870ffcd4bca78d49f61e": 1,
+    "685aa474aae705f2a792c6fc": 2,
+    "685407f2bdcc2683ad83b95c": 1,
+    "685aa4ab661af0792e6dcb4c": 1,
+    "68540b77449a2f5f252b0500": 1,
+    "68540ce011cea80f6c114d17": 1,
+    "68540dd9449a2f99ff2b05d2": 1,
+    "68541004449a2fa5a42b06ae": 3,
+    "6854112dbdcc26775483bd6b": 1,
+    "68541362bdcc26a5e383be10": 2,
+    "68541490449a2f564f2b083e": 1,
+    # Add more as needed
 }
 
 # Background email timer
@@ -121,7 +158,7 @@ def write_order_to_csv(data):
                     f'${item["line_price"]:.2f}',       # value
                     product_code,                       # code
                     item.get("title", ""),              # description
-                    item.get("quantity", 1),            # qty
+                    item.get("quantity", 1) * quantity_multiplier_map.get(product_id, 1) # qty
                     "Deliver ASAP"                      # Instructions
                 ]
                 writer.writerow(row)
