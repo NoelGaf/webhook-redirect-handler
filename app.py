@@ -22,7 +22,7 @@ redirect_map = {
     "685aa474aae705f2a792c6fc": "https://bits4bucks.com/shower-caddy",
     "685aa4ab661af0792e6dcb4c": "https://bits4bucks.com/zoom-ball",
     "68541362bdcc26a5e383be10": "https://bits4bucks.com/nivea-orchid",
-    "68541004449a2fa5a42b06ae": "https://bits4bucks.com/deep-waver",
+    "68541004449a2fa5a42b06ae": "https://bits4bucks.com/deep-waver"
 }
 latest_redirect = {"url": None}
 
